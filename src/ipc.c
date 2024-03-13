@@ -8,21 +8,6 @@
 
 /* TODO (maybe): settle on an API and publish the protocol. */
 
-static void chgid()
-{
-	struct group *g = getgrnam("keyd");
-
-	if (!g) {
-		fprintf(stderr,
-			"WARNING: failed to set effective group to \"keyd\" (make sure the group exists)\n");
-	} else {
-		if (setgid(g->gr_gid)) {
-			perror("setgid");
-			exit(-1);
-		}
-	}
-}
-
 int ipc_connect()
 {
 	int sd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -50,8 +35,6 @@ int ipc_create_server()
 	int sd = socket(AF_UNIX, SOCK_STREAM, 0);
 	int lfd;
 	struct sockaddr_un addr = {0};
-
-	chgid();
 
 	if (sd < 0) {
 		perror("socket");

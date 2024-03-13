@@ -2,13 +2,9 @@
 
 # TODO: make this more robust
 
-if [ `whoami` != "root" ]; then
-	echo "Must be run as root, restarting (sudo $0)"
-	sudo "$0" "$@"
-	exit $?
-fi
+# pgrep keyd && { echo "Stop keyd before running tests"; exit -1; }
 
-pgrep keyd && { echo "Stop keyd before running tests"; exit -1; }
+[ "$(id -u)" -eq 0 ] && root=true
 
 tmpdir=$(mktemp -d)
 
@@ -26,7 +22,12 @@ cd "$(dirname "$0")"
 cp test.conf "$tmpdir"
 
 (cd ..;make CONFIG_DIR="$tmpdir") || exit -1
-../bin/keyd > test.log 2>&1 &
+if [ "$root" ]; then
+	../bin/keyd > test.log 2>&1 &
+else
+	../bin/keyd -s "$tmpdir/socket" > test.log 2>&1 &
+fi
+
 
 pid=$!
 
