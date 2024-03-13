@@ -558,11 +558,6 @@ int run_daemon(int argc, char *argv[])
 	setvbuf(stdout, NULL, _IOLBF, 0);
 	setvbuf(stderr, NULL, _IOLBF, 0);
 
-	if (nice(-20) == -1) {
-		perror("nice");
-		exit(-1);
-	}
-
 	evloop_add_fd(ipcfd);
 
 	reload();

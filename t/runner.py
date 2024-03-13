@@ -342,7 +342,6 @@ import os
 
 gc.collect()
 gc.disable()
-os.nice(-20)
 
 tests = []
 failed = False
