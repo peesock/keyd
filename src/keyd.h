@@ -51,6 +51,9 @@
 #define ARRAY_SIZE(x) (int)(sizeof(x)/sizeof(x[0]))
 #define VKBD_NAME "keyd virtual keyboard"
 
+extern const char* SOCKET_PATH;
+extern const char* CONFIG_DIR;
+
 enum event_type {
 	EV_DEV_ADD,
 	EV_DEV_REMOVE,

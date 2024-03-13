@@ -14,8 +14,8 @@ CFLAGS:=-DVERSION=\"v$(VERSION)\ \($(COMMIT)\)\" \
 	-Wextra \
 	-Wno-unused \
 	-std=c11 \
-	-DSOCKET_PATH=\"$(SOCKET_PATH)\" \
-	-DCONFIG_DIR=\"$(CONFIG_DIR)\" \
+	-DSOCKET_PATH_DEFAULT=\"$(SOCKET_PATH)\" \
+	-DCONFIG_DIR_DEFAULT=\"$(CONFIG_DIR)\" \
 	-DDATA_DIR=\"$(PREFIX)/share/keyd\" \
 	-D_FORTIFY_SOURCE=2 \
 	-D_DEFAULT_SOURCE \
