@@ -6,6 +6,10 @@
 
 #include "keyd.h"
 
+const char* SOCKET_PATH = SOCKET_PATH_DEFAULT;
+const char* CONFIG_DIR = CONFIG_DIR_DEFAULT;
+static int argcount = 1;
+
 static int ipc_exec(int type, const char *data, size_t sz, uint32_t timeout)
 {
 	struct ipc_message msg;
@@ -46,7 +50,7 @@ static int version(int argc, char *argv[])
 
 static int help(int argc, char *argv[])
 {
-	printf("usage: keyd [-v] [-h] [command] [<args>]\n\n"
+	printf("usage: keyd [options] [<args>] [command] [<args>]\n\n"
 	       "Commands:\n"
 	       "    monitor [-t]                   Print key events in real time.\n"
 	       "    list-keys                      Print a list of valid key names.\n"
@@ -54,8 +58,10 @@ static int help(int argc, char *argv[])
 	       "    listen                         Print layer state changes of the running keyd daemon to stdout.\n"
 	       "    bind <binding> [<binding>...]  Add the supplied bindings to all loaded configs.\n"
 	       "Options:\n"
-	       "    -v, --version      Print the current version and exit.\n"
-	       "    -h, --help         Print help and exit.\n");
+	       "    -s, --socket <path>            Set socket path to <path>.\n"
+	       "    -c, --config <path>            Set config dir to <path>.\n"
+	       "    -v, --version                  Print the current version and exit.\n"
+	       "    -h, --help                     Print help and exit.\n");
 
 	return 0;
 }
@@ -193,6 +199,28 @@ static int reload()
 	return 0;
 }
 
+static int set_socket_path(int argc, char** argv)
+{
+	if (argc < 2){
+		help(argc, argv);
+		return 1;
+	}
+	SOCKET_PATH = argv[1];
+	argcount++;
+	return 64;
+}
+
+static int set_config_dir(int argc, char** argv)
+{
+	if (argc < 2){
+		help(argc, argv);
+		return 1;
+	}
+	CONFIG_DIR = argv[1];
+	argcount++;
+	return 64;
+}
+
 struct {
 	const char *name;
 	const char *flag;
@@ -213,6 +241,8 @@ struct {
 
 	{"reload", "", "", reload},
 	{"list-keys", "", "", list_keys},
+	{"", "-s", "--socket", set_socket_path},
+	{"", "-c", "--config", set_config_dir},
 };
 
 int main(int argc, char *argv[])
@@ -234,14 +264,21 @@ int main(int argc, char *argv[])
 	signal(SIGPIPE, SIG_IGN);
 
 	if (argc > 1) {
-		for (i = 0; i < ARRAY_SIZE(commands); i++)
-			if (!strcmp(commands[i].name, argv[1]) ||
-				!strcmp(commands[i].flag, argv[1]) ||
-				!strcmp(commands[i].long_flag, argv[1])) {
-				return commands[i].fn(argc - 1, argv + 1);
+		int status = 0;
+		_Bool exists = 0;
+		for (; argcount < argc; argcount++) {
+			for (i = 0; i < ARRAY_SIZE(commands); i++) {
+				if (!strcmp(commands[i].name, argv[argcount]) ||
+						!strcmp(commands[i].flag, argv[argcount]) ||
+						!strcmp(commands[i].long_flag, argv[argcount])) {
+					if ((status = commands[i].fn(argc - argcount, argv + argcount)) != 64)
+						return status;
+					exists = 1;
+				}
 			}
-
-		return help(argc, argv);
+			if (!exists)
+				return help(argc, argv);
+		}
 	}
 
 	run_daemon(argc, argv);
