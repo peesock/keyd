@@ -102,7 +102,14 @@ static int device_init(const char *path, struct device *dev)
 	struct input_absinfo absinfo;
 
 	if ((fd = open(path, O_RDWR | O_NONBLOCK | O_CLOEXEC, 0600)) < 0) {
-		keyd_log("failed to open %s\n", path);
+		switch (errno) {
+			case EACCES:
+				keyd_log("failed to open %s: permission denied\n", path);
+				break;
+			case ENOENT:
+				break;
+			default: keyd_log("failed to open %s\n", path);
+		}
 		return -1;
 	}
 
@@ -229,7 +236,7 @@ int devmon_create()
 		exit(-1);
 	}
 
-	int wd = inotify_add_watch(fd, "/dev/input/", IN_CREATE);
+	int wd = inotify_add_watch(fd, "/dev/input/", IN_ATTRIB);
 	if (wd < 0) {
 		perror("inotify");
 		exit(-1);
