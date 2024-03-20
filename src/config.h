@@ -105,7 +105,7 @@ struct layer {
 };
 
 struct command {
-	char cmd[256];
+	char cmd[4096];
 };
 
 struct config {

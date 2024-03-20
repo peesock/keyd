@@ -25,7 +25,7 @@
 #include "unicode.h"
 
 #define MAX_FILE_SZ 65536
-#define MAX_LINE_LEN 256
+#define MAX_LINE_LEN 4096
 
 #undef warn
 #define warn(fmt, ...) keyd_log("\ty{WARNING:} "fmt"\n", ##__VA_ARGS__)
